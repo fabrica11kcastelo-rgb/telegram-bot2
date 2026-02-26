@@ -1,6 +1,14 @@
 import requests
+import logging
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ApplicationBuilder, ContextTypes
+
+# Configura logging para ver melhor nos logs do Shard Cloud
+logging.basicConfig(
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    level=logging.INFO
+)
+logger = logging.getLogger(__name__)
 
 # ================= CONFIGURAÇÕES =================
 
@@ -57,7 +65,6 @@ Prezzo: ${price:.6f}
 Volume: ${volume:.2f}
 
 ⚡ Large wallets entered this token recently.
-
 Liquidity increasing fast.
 
 👇 Secure your position before public breakout:
@@ -70,24 +77,21 @@ async def market_update(context: ContextTypes.DEFAULT_TYPE):
 📊 Market Update
 
 Crypto market is heating up again.
-
 Early signals are appearing more frequently.
-
 Stay ready for the next opportunity.
 
 ⚡ Next alert could come anytime.
 """
-
-    await context.bot.send_message(
-        chat_id=GROUP_ID,
-        text=message
-    )
+    try:
+        await context.bot.send_message(chat_id=GROUP_ID, text=message)
+        logger.info("Market update enviado com sucesso")
+    except Exception as e:
+        logger.error("Erro ao enviar market update: %s", e)
 
 # ================= BITQUERY =================
 
 def fetch_tokens():
     url = "https://graphql.bitquery.io"
-
     headers = {
         "Content-Type": "application/json",
         "X-API-KEY": BITQUERY_API_KEY
@@ -119,76 +123,86 @@ def fetch_tokens():
     """
 
     try:
-        response = requests.post(
-            url,
-            json={'query': query},
-            headers=headers,
-            timeout=10
-        )
-
+        response = requests.post(url, json={'query': query}, headers=headers, timeout=15)
+        response.raise_for_status()  # Levanta exceção se não for 200 OK
         data = response.json()
-        return data['data']['Solana']['DEXTrades']
-
+        return data.get('data', {}).get('Solana', {}).get('DEXTrades', [])
     except Exception as e:
-        print("Bitquery error:", e)
+        logger.error("Bitquery error: %s", e)
         return []
 
 # ================= ALERTAS =================
 
 async def detect_pumps(context: ContextTypes.DEFAULT_TYPE):
     tokens = fetch_tokens()
+    if not tokens:
+        logger.info("Nenhum token detectado nesta rodada")
+        return
 
     for item in tokens:
-        symbol = item['Trade']['Buy']['Currency']['Symbol']
-        address = item['Trade']['Buy']['Currency']['MintAddress']
-        price = item['Trade']['Price']
-        volume = item['Trade']['Buy']['Amount']
-
-        if address in sent_tokens:
-            continue
-
-        sent_tokens.add(address)
-
-        message = build_message(symbol, price, volume)
-
-        keyboard = [[InlineKeyboardButton(
-            "🚀 BUY EARLY (PUMP SOON)",
-            url=f"{AXIOM_BASE_URL}?token={address}"
-        )]]
-
-        reply_markup = InlineKeyboardMarkup(keyboard)
-
         try:
+            symbol = item['Trade']['Buy']['Currency']['Symbol']
+            address = item['Trade']['Buy']['Currency']['MintAddress']
+            price = float(item['Trade']['Price']) if item['Trade']['Price'] else 0.0
+            volume = float(item['Trade']['Buy']['Amount']) if item['Trade']['Buy']['Amount'] else 0.0
+
+            if address in sent_tokens:
+                continue
+
+            sent_tokens.add(address)
+            logger.info("Novo pump detectado: %s (%s)", symbol, address)
+
+            message = build_message(symbol, price, volume)
+
+            keyboard = [[InlineKeyboardButton(
+                "🚀 BUY EARLY (PUMP SOON)",
+                url=f"{AXIOM_BASE_URL}?token={address}"
+            )]]
+
+            reply_markup = InlineKeyboardMarkup(keyboard)
+
             await context.bot.send_message(
                 chat_id=GROUP_ID,
                 text=message,
                 reply_markup=reply_markup
             )
         except Exception as e:
-            print("Telegram error:", e)
+            logger.error("Erro processando token %s: %s", item.get('Trade', {}).get('Buy', {}).get('Currency', {}).get('Symbol'), e)
 
 # ================= START BOT =================
 
-application = ApplicationBuilder().token(TELEGRAM_TOKEN).build()
+def main():
+    application = ApplicationBuilder().token(TELEGRAM_TOKEN).build()
 
-# Adiciona os jobs repetitivos
-application.job_queue.run_repeating(
-    detect_pumps,
-    interval=CHECK_INTERVAL,
-    first=30
-)
+    # Job de teste inicial (opcional, mas ajuda no debug)
+    async def start_message(context: ContextTypes.DEFAULT_TYPE):
+        await context.bot.send_message(
+            chat_id=GROUP_ID,
+            text="🤖 Bot ultra global iniciado! Checando pumps a cada 30 min."
+        )
 
-# MARKET UPDATE 12 HORAS (43200 segundos = 12h)
-application.job_queue.run_repeating(
-    market_update,
-    interval=43200,
-    first=60
-)
+    application.job_queue.run_once(start_message, when=10)
 
-print("BOT ULTRA GLOBAL RODANDO...")
+    # Jobs repetitivos
+    application.job_queue.run_repeating(
+        detect_pumps,
+        interval=CHECK_INTERVAL,
+        first=30
+    )
 
-# Inicia o polling (sem necessidade de porta exposta)
-application.run_polling(
-    allowed_updates=["message", "callback_query"],  # Otimiza polling
-    drop_pending_updates=True  # Ignora mensagens antigas ao iniciar
-)
+    application.job_queue.run_repeating(
+        market_update,
+        interval=43200,  # 12 horas
+        first=60
+    )
+
+    logger.info("BOT ULTRA GLOBAL RODANDO...")
+    print("BOT ULTRA GLOBAL RODANDO...")  # Mantém o print se você gosta
+
+    application.run_polling(
+        allowed_updates=["message", "callback_query"],
+        drop_pending_updates=True
+    )
+
+if __name__ == '__main__':
+    main()
