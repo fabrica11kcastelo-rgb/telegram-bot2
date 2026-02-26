@@ -1,5 +1,6 @@
 import requests
 import logging
+import os  # <--- Adicionado aqui
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ApplicationBuilder, ContextTypes
 
@@ -11,12 +12,17 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # ================= CONFIGURAÇÕES =================
+# Agora lendo das variáveis de ambiente do Shard Cloud
 
-BITQUERY_API_KEY = "ory_at_Cl2GFt1woVbMXFnxhZNBVh_50BxC-rojZ5MIcLLGR-k.uA7w5EChs5Buoq5CIfNPa8In-_ui7lsZXn9TdtOqsWE"
+TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
+if not TELEGRAM_TOKEN:
+    raise ValueError("TELEGRAM_TOKEN não encontrado nas variáveis de ambiente! Adicione no Shard Cloud.")
 
-TELEGRAM_TOKEN = "8764476062:AAFffDxJTogKq-2lxXTybJOeqqaIs5CT8p8"
+BITQUERY_API_KEY = os.getenv("BITQUERY_API_KEY")
+if not BITQUERY_API_KEY:
+    raise ValueError("BITQUERY_API_KEY não encontrado nas variáveis de ambiente! Adicione no Shard Cloud.")
 
-GROUP_ID = -1003647005142
+GROUP_ID = int(os.getenv("GROUP_ID", "-1003647005142"))  # fallback caso esqueça de adicionar
 
 CHECK_INTERVAL = 1800  # 30 minutos
 
@@ -124,7 +130,7 @@ def fetch_tokens():
 
     try:
         response = requests.post(url, json={'query': query}, headers=headers, timeout=15)
-        response.raise_for_status()  # Levanta exceção se não for 200 OK
+        response.raise_for_status()
         data = response.json()
         return data.get('data', {}).get('Solana', {}).get('DEXTrades', [])
     except Exception as e:
@@ -174,7 +180,7 @@ async def detect_pumps(context: ContextTypes.DEFAULT_TYPE):
 def main():
     application = ApplicationBuilder().token(TELEGRAM_TOKEN).build()
 
-    # Job de teste inicial (opcional, mas ajuda no debug)
+    # Job de teste inicial
     async def start_message(context: ContextTypes.DEFAULT_TYPE):
         await context.bot.send_message(
             chat_id=GROUP_ID,
@@ -197,7 +203,7 @@ def main():
     )
 
     logger.info("BOT ULTRA GLOBAL RODANDO...")
-    print("BOT ULTRA GLOBAL RODANDO...")  # Mantém o print se você gosta
+    print("BOT ULTRA GLOBAL RODANDO...")
 
     application.run_polling(
         allowed_updates=["message", "callback_query"],
