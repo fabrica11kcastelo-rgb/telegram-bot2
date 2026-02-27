@@ -68,7 +68,7 @@ Only early members can see this phase.
 
 def fetch_tokens():
 
-    url = "https://streaming.bitquery.io/graphql"
+    url = "https://graphql.bitquery.io"
 
     headers = {
         "Content-Type": "application/json",
