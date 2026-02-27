@@ -131,9 +131,11 @@ async def detect_pumps(context: ContextTypes.DEFAULT_TYPE):
     for item in tokens:
 
         symbol = item['Trade']['Buy']['Currency']['Symbol']
-        address = item['Trade']['Buy']['Currency']['MintAddress']
-        price = 0.000000
-        volume = item['Trade']['Buy']['Amount']
+address = item['Trade']['Buy']['Currency']['MintAddress']
+
+price = 0.000001
+
+volume = float(item['Trade']['Buy']['Amount'])
 
         if address in sent_tokens:
             continue
