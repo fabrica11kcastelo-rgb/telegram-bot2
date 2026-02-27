@@ -74,9 +74,11 @@ def fetch_tokens():
     }
 
     query = """
-    query {
+    {
       Solana {
-        DEXTrades(limit: 5) {
+        DEXTrades(
+          limit: {count: 5}
+        ) {
           Trade {
             Buy {
               Amount
@@ -102,11 +104,11 @@ def fetch_tokens():
         )
 
         print("STATUS:", response.status_code)
-        print("RAW:", response.text[:200])
+        print("RAW:", response.text[:300])
 
         data = response.json()
 
-        if not data.get("data"):
+        if data.get("data") is None:
             print("NO DATA RETURNED")
             return []
 
