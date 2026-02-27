@@ -66,48 +66,55 @@ Only early members can see this phase.
 
 def fetch_tokens():
 
-    url = "https://streaming.bitquery.io/graphql"
+    url = "https://graphql.bitquery.io"
 
     headers = {
         "Content-Type": "application/json",
-        "Authorization": f"Bearer {BITQUERY_API_KEY}"
+        "X-API-KEY": BITQUERY_API_KEY
     }
 
     query = """
-{
-  Solana {
-    DEXTrades(
-      limit: {count: 5}
-    ) {
-      Trade {
-        Buy {
-          Amount
-          Currency {
-            Symbol
-            MintAddress
+    {
+      Solana {
+        DEXTrades(
+          limit: {count: 5}
+        ) {
+          Trade {
+            Buy {
+              Amount
+              Currency {
+                Symbol
+                MintAddress
+              }
+            }
           }
         }
       }
     }
-  }
-}
-"""
+    """
 
     try:
 
         response = requests.post(
             url,
-            json={"query": query},
+            json={'query': query},
             headers=headers,
             timeout=10
         )
 
         print("STATUS:", response.status_code)
-        print("RAW:", response.text[:300])
 
         data = response.json()
 
-        if data.get("data") is None:
+        if not data:
+            print("NO RESPONSE")
+            return []
+
+        if "data" not in data:
+            print("INVALID RESPONSE")
+            return []
+
+        if data["data"] is None:
             print("NO DATA RETURNED")
             return []
 
@@ -120,7 +127,6 @@ def fetch_tokens():
     except Exception as e:
 
         print("Bitquery error:", e)
-
         return []
 # ================= ALERTAS =================
 
@@ -130,33 +136,40 @@ async def detect_pumps(context: ContextTypes.DEFAULT_TYPE):
 
     for item in tokens:
 
-    symbol = item['Trade']['Buy']['Currency']['Symbol']
-    address = item['Trade']['Buy']['Currency']['MintAddress']
-    price = 0.000001
-    volume = float(item['Trade']['Buy']['Amount'])
-
-    if address in sent_tokens:
-        continue
-
-    sent_tokens.add(address)
-
-    message = build_message(symbol, price, volume)
-
-    keyboard = [[InlineKeyboardButton(
-        "👁 See the whales' entry points 🐋",
-        url=f"{AXIOM_BASE_URL}?token={address}"
-    )]]
-
-    markup = InlineKeyboardMarkup(keyboard)
-
     try:
+
+        symbol = item['Trade']['Buy']['Currency']['Symbol']
+        address = item['Trade']['Buy']['Currency']['MintAddress']
+
+        price = 0.000001
+
+        volume = float(item['Trade']['Buy']['Amount'])
+
+        if address in sent_tokens:
+            continue
+
+        sent_tokens.add(address)
+
+        message = build_message(symbol, price, volume)
+
+        keyboard = [[InlineKeyboardButton(
+            "👁 See the whales' entry points 🐋",
+            url=f"{AXIOM_BASE_URL}?token={address}"
+        )]]
+
+        markup = InlineKeyboardMarkup(keyboard)
+
         await context.bot.send_message(
             chat_id=GROUP_ID,
             text=message,
             reply_markup=markup
         )
+
+        print("ALERT SENT:", symbol)
+
     except Exception as e:
-        print("Telegram error:", e)
+
+        print("TOKEN ERROR:", e)
 # ================= GATILHOS =================
 
 trigger_messages = [
