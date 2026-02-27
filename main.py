@@ -74,7 +74,6 @@ def fetch_tokens():
     "Content-Type": "application/json",
     "X-API-KEY": BITQUERY_API_KEY
 }
-}
     }
 
     query = """
