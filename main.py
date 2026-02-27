@@ -79,7 +79,7 @@ def fetch_tokens():
 {
   Solana {
     DEXTrades(
-      limit: {count: 3}
+      limit: {count: 8}
       orderBy: {descending: Block_Time}
     ) {
       Block {
