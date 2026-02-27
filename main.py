@@ -211,7 +211,24 @@ async def main():
 
     await app.run_polling()
 
-# ================= START =================
+# ========= START BOT =========
 
-if __name__ == "__main__":
-    asyncio.run(main())
+app = ApplicationBuilder().token(TELEGRAM_TOKEN).build()
+
+# ALERTAS BITQUERY
+app.job_queue.run_repeating(
+    detect_pumps,
+    interval=CHECK_INTERVAL,
+    first=60
+)
+
+# GATILHOS 6 HORAS
+app.job_queue.run_repeating(
+    send_trigger,
+    interval=21600,
+    first=120
+)
+
+print("ELITE WHALE BOT RUNNING")
+
+app.run_polling()
