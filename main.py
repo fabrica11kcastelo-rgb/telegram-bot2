@@ -74,12 +74,9 @@ def fetch_tokens():
     }
 
     query = """
-    {
+    query {
       Solana {
-        DEXTrades(
-          limit: {count: 6}
-          orderBy: {descendingByField: "Trade_Buy_Amount"}
-        ) {
+        DEXTrades(limit: 5) {
           Trade {
             Buy {
               Amount
@@ -99,14 +96,19 @@ def fetch_tokens():
 
         response = requests.post(
             url,
-            json={'query': query},
+            json={"query": query},
             headers=headers,
             timeout=10
         )
 
         print("STATUS:", response.status_code)
+        print("RAW:", response.text[:200])
 
         data = response.json()
+
+        if not data.get("data"):
+            print("NO DATA RETURNED")
+            return []
 
         trades = data["data"]["Solana"]["DEXTrades"]
 
