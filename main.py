@@ -130,19 +130,19 @@ async def detect_pumps(context: ContextTypes.DEFAULT_TYPE):
 
     for item in tokens:
 
-        symbol = item['Trade']['Buy']['Currency']['Symbol']
-address = item['Trade']['Buy']['Currency']['MintAddress']
+    symbol = item['Trade']['Buy']['Currency']['Symbol']
+    address = item['Trade']['Buy']['Currency']['MintAddress']
 
-price = 0.000001
+    price = 0.000001
 
-volume = float(item['Trade']['Buy']['Amount'])
+    volume = float(item['Trade']['Buy']['Amount'])
 
-        if address in sent_tokens:
-            continue
+    if address in sent_tokens:
+        continue
 
-        sent_tokens.add(address)
+    sent_tokens.add(address)
 
-        message = build_message(symbol, price, volume)
+    message = build_message(symbol, price, volume)
 
         keyboard = [[InlineKeyboardButton(
             "👁 See the whales' entry points 🐋",
