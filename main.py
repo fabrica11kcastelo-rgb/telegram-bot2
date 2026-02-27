@@ -68,11 +68,13 @@ Only early members can see this phase.
 
 def fetch_tokens():
 
-    url = "https://streaming.bitquery.io/graphql"
+    url = "https://graphql.bitquery.io"
 
     headers = {
-        "Content-Type": "application/json",
-        "X-API-KEY": BITQUERY_API_KEY
+    "Content-Type": "application/json",
+    "X-API-KEY": BITQUERY_API_KEY
+}
+}
     }
 
     query = """
@@ -216,11 +218,13 @@ async def send_trigger(context):
 
 # ================= START BOT =================
 
-app = ApplicationBuilder().token(TELEGRAM_TOKEN).request_kwargs(
-    connect_timeout=30,  # tempo máximo para conectar (segundos)
-    read_timeout=30      # tempo máximo para receber resposta (segundos)
-).build()
+# ========= START BOT =========
 
+app = ApplicationBuilder() \
+    .token(TELEGRAM_TOKEN) \
+    .connect_timeout(30) \
+    .read_timeout(30) \
+    .build()
 app.job_queue.run_repeating(
     detect_pumps,
     interval=CHECK_INTERVAL,
