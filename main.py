@@ -132,9 +132,7 @@ async def detect_pumps(context: ContextTypes.DEFAULT_TYPE):
 
     symbol = item['Trade']['Buy']['Currency']['Symbol']
     address = item['Trade']['Buy']['Currency']['MintAddress']
-
     price = 0.000001
-
     volume = float(item['Trade']['Buy']['Amount'])
 
     if address in sent_tokens:
@@ -159,7 +157,6 @@ async def detect_pumps(context: ContextTypes.DEFAULT_TYPE):
         )
     except Exception as e:
         print("Telegram error:", e)
-
 # ================= GATILHOS =================
 
 trigger_messages = [
