@@ -216,7 +216,10 @@ async def send_trigger(context):
 
 # ================= START BOT =================
 
-app = ApplicationBuilder().token(TELEGRAM_TOKEN).build()
+app = ApplicationBuilder().token(TELEGRAM_TOKEN).request_kwargs(
+    connect_timeout=30,  # tempo máximo para conectar (segundos)
+    read_timeout=30      # tempo máximo para receber resposta (segundos)
+).build()
 
 app.job_queue.run_repeating(
     detect_pumps,
