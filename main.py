@@ -78,18 +78,15 @@ def fetch_tokens():
       Solana {
         DEXTrades(
           limit: {count: 6}
-          orderBy: {descending: Trade_Buy_Amount}
-          where: {
-            Trade_Buy_Amount: {gt: 10}
-          }
+          orderBy: {descendingByField: "Trade_Buy_Amount"}
         ) {
           Trade {
             Buy {
+              Amount
               Currency {
                 Symbol
                 MintAddress
               }
-              Amount
             }
             Price
           }
@@ -108,15 +105,14 @@ def fetch_tokens():
         )
 
         print("STATUS:", response.status_code)
-        print("RESPONSE:", response.text[:200])
 
         data = response.json()
 
-        tokens = data['data']['Solana']['DEXTrades']
+        trades = data["data"]["Solana"]["DEXTrades"]
 
-        print("TOKENS FOUND:", len(tokens))
+        print("TOKENS FOUND:", len(trades))
 
-        return tokens
+        return trades
 
     except Exception as e:
 
