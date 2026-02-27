@@ -133,7 +133,7 @@ async def detect_pumps(context: ContextTypes.DEFAULT_TYPE):
 
         symbol = item['Trade']['Buy']['Currency']['Symbol']
         address = item['Trade']['Buy']['Currency']['MintAddress']
-        price = item['Trade']['Price']
+        price = 0.000000
         volume = item['Trade']['Buy']['Amount']
 
         if address in sent_tokens:
