@@ -74,25 +74,24 @@ def fetch_tokens():
     }
 
     query = """
-    {
-      Solana {
-        DEXTrades(
-          limit: {count: 5}
-        ) {
-          Trade {
-            Buy {
-              Amount
-              Currency {
-                Symbol
-                MintAddress
-              }
-            }
-            Price
+{
+  Solana {
+    DEXTrades(
+      limit: {count: 5}
+    ) {
+      Trade {
+        Buy {
+          Amount
+          Currency {
+            Symbol
+            MintAddress
           }
         }
       }
     }
-    """
+  }
+}
+"""
 
     try:
 
