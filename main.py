@@ -86,8 +86,7 @@ def fetch_tokens():
       Trade {
 
         Buy {
-          Amount
-          PriceInUSD
+          AmountInUSD
           Currency {
             Symbol
             MintAddress
@@ -95,8 +94,7 @@ def fetch_tokens():
         }
 
         Sell {
-          Amount
-          PriceInUSD
+          AmountInUSD
           Currency {
             Symbol
             MintAddress
