@@ -79,26 +79,35 @@ def fetch_tokens():
 {
   Solana {
     DEXTrades(
-      limit: {count: 8}
+      limit: {count: 5}
       orderBy: {descending: Block_Time}
     ) {
       Block {
         Time
       }
       Trade {
+
         Buy {
-          Amount
+          AmountInUSD
           Currency {
             Symbol
             MintAddress
           }
         }
+
+        Sell {
+          AmountInUSD
+          Currency {
+            Symbol
+            MintAddress
+          }
+        }
+
       }
     }
   }
 }
 """
-
     try:
 
         response = requests.post(
