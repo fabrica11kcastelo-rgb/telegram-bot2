@@ -66,11 +66,11 @@ Only early members can see this phase.
 
 def fetch_tokens():
 
-    url = "https://graphql.bitquery.io"
+    url = "https://streaming.bitquery.io/graphql"
 
     headers = {
         "Content-Type": "application/json",
-        "X-API-KEY": BITQUERY_API_KEY
+        "Authorization": f"Bearer {BITQUERY_API_KEY}"
     }
 
     query = """
@@ -107,6 +107,9 @@ def fetch_tokens():
             timeout=10
         )
 
+        print("STATUS:", response.status_code)
+        print("RESPONSE:", response.text[:200])
+
         data = response.json()
 
         tokens = data['data']['Solana']['DEXTrades']
@@ -120,7 +123,6 @@ def fetch_tokens():
         print("Bitquery error:", e)
 
         return []
-
 # ================= ALERTAS =================
 
 async def detect_pumps(context: ContextTypes.DEFAULT_TYPE):
