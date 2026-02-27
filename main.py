@@ -108,7 +108,11 @@ def fetch_tokens():
 
         data = response.json()
 
-        return data['data']['Solana']['DEXTrades']
+        tokens = data['data']['Solana']['DEXTrades']
+
+print("TOKENS FOUND:", len(tokens))
+
+return tokens
 
     except Exception as e:
         print("Bitquery error:", e)
