@@ -144,21 +144,21 @@ async def detect_pumps(context: ContextTypes.DEFAULT_TYPE):
 
     message = build_message(symbol, price, volume)
 
-        keyboard = [[InlineKeyboardButton(
-            "👁 See the whales' entry points 🐋",
-            url=f"{AXIOM_BASE_URL}?token={address}"
-        )]]
+    keyboard = [[InlineKeyboardButton(
+        "👁 See the whales' entry points 🐋",
+        url=f"{AXIOM_BASE_URL}?token={address}"
+    )]]
 
-        markup = InlineKeyboardMarkup(keyboard)
+    markup = InlineKeyboardMarkup(keyboard)
 
-        try:
-            await context.bot.send_message(
-                chat_id=GROUP_ID,
-                text=message,
-                reply_markup=markup
-            )
-        except Exception as e:
-            print("Telegram error:", e)
+    try:
+        await context.bot.send_message(
+            chat_id=GROUP_ID,
+            text=message,
+            reply_markup=markup
+        )
+    except Exception as e:
+        print("Telegram error:", e)
 
 # ================= GATILHOS =================
 
