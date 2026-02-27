@@ -106,6 +106,39 @@ def fetch_tokens():
 
         data = response.json()
 
+        print("RAW:", data)
+
+        if not data:
+            return []
+
+        if data.get("data") is None:
+            print("NO DATA RETURNED")
+            return []
+
+        trades = data["data"]["Solana"]["DEXTrades"]
+
+        print("TOKENS FOUND:", len(trades))
+
+        return trades
+
+    except Exception as e:
+
+        print("Bitquery error:", e)
+        return []
+
+    try:
+
+        response = requests.post(
+            url,
+            json={'query': query},
+            headers=headers,
+            timeout=10
+        )
+
+        print("STATUS:", response.status_code)
+
+        data = response.json()
+
         if not data:
             print("NO RESPONSE")
             return []
@@ -140,9 +173,7 @@ async def detect_pumps(context: ContextTypes.DEFAULT_TYPE):
 
         symbol = item['Trade']['Buy']['Currency']['Symbol']
         address = item['Trade']['Buy']['Currency']['MintAddress']
-
         price = 0.000001
-
         volume = float(item['Trade']['Buy']['Amount'])
 
         if address in sent_tokens:
