@@ -77,10 +77,10 @@ def fetch_tokens():
     {
       Solana {
         DEXTrades(
-          limit: {count: 4}
+          limit: {count: 6}
           orderBy: {descending: Trade_Buy_Amount}
           where: {
-            Trade_Buy_Amount: {gt: 300}
+            Trade_Buy_Amount: {gt: 10}
           }
         ) {
           Trade {
@@ -99,6 +99,7 @@ def fetch_tokens():
     """
 
     try:
+
         response = requests.post(
             url,
             json={'query': query},
@@ -110,12 +111,14 @@ def fetch_tokens():
 
         tokens = data['data']['Solana']['DEXTrades']
 
-print("TOKENS FOUND:", len(tokens))
+        print("TOKENS FOUND:", len(tokens))
 
-return tokens
+        return tokens
 
     except Exception as e:
+
         print("Bitquery error:", e)
+
         return []
 
 # ================= ALERTAS =================
