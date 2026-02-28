@@ -67,15 +67,31 @@ def get_data():
     query = """
 {
   Solana {
-    Blocks(limit: {count: 1}) {
-      Block {
-        Time
+    DEXTrades(
+      options: {
+        limit: 5
+        desc: "tradeAmount"
+      }
+    ) {
+      tradeAmount
+
+      buyAmount
+
+      buyCurrency {
+        symbol
+        name
+        address
+      }
+
+      block {
+        timestamp {
+          time
+        }
       }
     }
   }
 }
 """
-
     headers = {
     "Content-Type": "application/json",
     "Authorization": f"Bearer {BITQUERY_API_KEY}"
