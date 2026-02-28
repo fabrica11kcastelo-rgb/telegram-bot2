@@ -18,7 +18,7 @@ REF_LINK = "https://axiom.trade/@wahrungs"
 # ENDPOINT BITQUERY V2
 #########################################
 
-URL = "https://oauth.bitquery.io/graphql"
+URL = "https://streaming.bitquery.io/graphql"
 #########################################
 # CONTROLE
 #########################################
@@ -63,10 +63,25 @@ def send_telegram(text, button=True):
 #########################################
 
 def get_data():
-query = """
+
+    query = """
 query MyQuery {
-  Solana {
-    Blocks(limit: {count: 1}) {
+  Solana(dataset: realtime) {
+    DEXTrades(
+      limit: {count: 5}
+    ) {
+      Trade {
+        Buy {
+          Currency {
+            Symbol
+            Name
+            MintAddress
+          }
+          Amount
+          Price
+        }
+      }
+      TradeAmount
       Block {
         Time
       }
@@ -74,22 +89,15 @@ query MyQuery {
   }
 }
 """
+
     headers = {
-    "Content-Type": "application/json",
-    "Authorization": f"Bearer {BITQUERY_API_KEY}"
-}
-    
+        "Content-Type":"application/json",
+        "Authorization":f"Bearer {BITQUERY_API_KEY}"
+    }
 
-    try:
+    r = requests.post(URL,json={"query":query},headers=headers)
 
-        r = requests.post(
-            URL,
-            json={"query":query},
-            headers=headers,
-            timeout=30
-        )
-
-        return r.json()
+    return r.json()
 
     except Exception as e:
 
