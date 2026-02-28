@@ -67,7 +67,13 @@ def get_data():
     query = """
 {
   Solana {
-    DEXTrades(limit: {count: 5}) {
+    DEXTrades(
+      limit: {count: 5}
+      orderBy: {descending: Block_Time}
+    ) {
+      Block {
+        Time
+      }
       Trade {
         Buy {
           Currency {
