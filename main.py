@@ -72,6 +72,7 @@ def get_data():
         Buy {
           Currency {
             Symbol
+            Name
             MintAddress
           }
         }
