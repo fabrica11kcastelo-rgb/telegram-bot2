@@ -65,20 +65,17 @@ def send_telegram(text, button=True):
 def get_data():
 
     query = """
-query {
+{
   Solana {
-    DEXTrades(limit: {count: 10}) {
+    DEXTrades(limit: {count: 5}) {
       Trade {
         Buy {
           Currency {
             Symbol
-            Name
             MintAddress
           }
-          Amount
         }
       }
-      TradeAmount
     }
   }
 }
