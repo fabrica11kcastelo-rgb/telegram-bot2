@@ -65,9 +65,11 @@ def send_telegram(text, button=True):
 def get_data():
 
     query = """
-query {
-  Solana {
-    DEXTrades(limit: {count: 5}) {
+query MyQuery {
+  Solana(dataset: realtime) {
+    DEXTrades(
+      limit: {count: 5}
+    ) {
       Trade {
         Buy {
           Currency {
@@ -75,9 +77,14 @@ query {
             Name
             MintAddress
           }
+          Amount
+          Price
         }
       }
       TradeAmount
+      Block {
+        Time
+      }
     }
   }
 }
