@@ -66,24 +66,21 @@ def get_data():
 
     query = """
 query {
-Solana {
-DEXTrades(
-limit: {count: 10}
-) {
-Trade {
-Buy {
-Currency {
-Symbol
-Name
-MintAddress
-}
-Amount
-Price
-}
-}
-TradeAmount
-}
-}
+  Solana {
+    DEXTrades(limit: {count: 10}) {
+      Trade {
+        Buy {
+          Currency {
+            Symbol
+            Name
+            MintAddress
+          }
+          Amount
+        }
+      }
+      TradeAmount
+    }
+  }
 }
 """
 
