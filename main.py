@@ -18,7 +18,7 @@ REF_LINK = "https://axiom.trade/@wahrungs"
 # ENDPOINT BITQUERY V2
 #########################################
 
-URL = "https://streaming.bitquery.io/graphql"
+URL = "https://oauth.bitquery.io/graphql"
 #########################################
 # CONTROLE
 #########################################
