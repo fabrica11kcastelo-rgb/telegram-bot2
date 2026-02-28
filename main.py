@@ -1,252 +1,311 @@
 import requests
-import asyncio
+import time
 import random
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import ApplicationBuilder, ContextTypes
 
-BITQUERY_API_KEY = "ory_at_Cl2GFt1woVbMXFnxhZNBVh_50BxC-rojZ5MIcLLGR-k.uA7w5EChs5Buoq5CIfNPa8In-_ui7lsZXn9TdtOqsWE"
-TELEGRAM_TOKEN = "8764476062:AAFffDxJTogKq-2lxXTybJOeqqaIs5CT8p8"
-GROUP_ID = -1003647005142
-CHECK_INTERVAL = 3600
-AXIOM_BASE_URL = "https://axiom.trade/@wahrungs"
+#########################################
+# CONFIGURAÇÃO
+#########################################
+
+TELEGRAM_TOKEN = "8764476062:AAFffDxJTogKq-2lxXTybJOeqqaIs5CT8p8
+"
+GROUP_ID = "-1003647005142"
+
+BITQUERY_API_KEY = "ory_at_Cl2GFt1woVbMXFnxhZNBVh_50BxC-rojZ5MIcLLGR-k.uA7w5EChs5Buoq5CIfNPa8In-_ui7lsZXn9TdtOqsWE
+"
+
+REF_LINK = "https://axiom.trade/@wahrungs"
+
+#########################################
+# ENDPOINT BITQUERY V2
+#########################################
+
+URL = "https://streaming.bitquery.io/graphql"
+
+#########################################
+# CONTROLE
+#########################################
 
 sent_tokens = set()
 
-# ================= ALERTA =================
+#########################################
+# TELEGRAM
+#########################################
 
-def build_message(symbol, price, volume):
+def send_telegram(text, button=True):
 
-    return f"""
-🚨 LIVE WHALE MOVEMENT DETECTED
+    url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
 
-AI detected early accumulation.
-
-━━━━━━━━━━━━━━━━━━
-
-🐋 Whale Entry Signal
-
-Token: #{symbol}
-
-Price:
-${price:.6f}
-
-Detected Volume:
-${volume:.2f}
-
-━━━━━━━━━━━━━━━━━━
-
-📊 Analysis
-
-• Large wallets entering
-• Liquidity increasing
-• Early phase detected
-
-━━━━━━━━━━━━━━━━━━
-
-⏳ Public discovery phase not started
-
-Data still not visible on public trackers.
-
-Only early members can see this phase.
-
-━━━━━━━━━━━━━━━━━━
-
-🌍 GLOBAL SCANNER ACTIVE
-
-🇺🇸 Early accumulation detected
-🇧🇷 Acumulação inicial detectada
-🇩🇪 Frühe Akkumulation erkannt
-🇪🇸 Acumulación temprana detectada
-
-━━━━━━━━━━━━━━━━━━
-
-👇 Inspect activities:
-"""
-
-
-# ================= BITQUERY =================
-
-def fetch_tokens():
-
-    url = "https://graphql.bitquery.io"
-
-    headers = {
-    "Content-Type": "application/json",
-    "X-API-KEY": BITQUERY_API_KEY
-}
+    payload = {
+        "chat_id": GROUP_ID,
+        "text": text,
+        "parse_mode":"HTML"
     }
+
+    if button:
+
+        payload["reply_markup"] = {
+            "inline_keyboard":[[
+                {
+                    "text":"🔥 Check Live Activity",
+                    "url":REF_LINK
+                }
+            ]]
+        }
+
+    requests.post(url,json=payload)
+
+
+#########################################
+# QUERY BITQUERY V2 (ANTI ERRO)
+#########################################
+
+def get_data():
 
     query = """
-{
-  Solana {
-    DEXTrades(
-      limit: {count: 5}
-      orderBy: {descending: Block_Time}
-    ) {
-      Block {
-        Time
-      }
-      Trade {
-        Buy {
-          AmountInUSD
-          Currency {
-            Symbol
-            MintAddress
-          }
-        }
-        Sell {
-          AmountInUSD
-          Currency {
-            Symbol
-            MintAddress
-          }
-        }
-      }
-    }
-  }
+query {
+Solana {
+
+DEXTrades(
+limit: {count: 15}
+orderBy: {descending: TradeAmount}
+) {
+
+Trade {
+
+Buy {
+
+Currency {
+Symbol
+Name
+MintAddress
+}
+
+Amount
+
+Price
+}
+
+Sell {
+
+Amount
+}
+
+}
+
+TradeAmount
+
+Block {
+Time
+}
+
+}
+
+}
 }
 """
+
+    headers = {
+
+        "Content-Type":"application/json",
+        "Authorization":f"Bearer {BITQUERY_API_KEY}"
+
+    }
+
+    r = requests.post(URL,json={"query":query},headers=headers)
+
+    return r.json()
+
+
+#########################################
+# FILTRO INTELIGENTE
+#########################################
+
+def detect_signals():
+
+    data = get_data()
+
     try:
-
-        response = requests.post(
-            url,
-            json={'query': query},
-            headers=headers,
-            timeout=10
-        )
-
-        print("STATUS:", response.status_code)
-
-        data = response.json()
-
-        print("RAW:", data)
-
-        if not data:
-            return []
-
-        if data.get("data") is None:
-            print("NO DATA RETURNED")
-            return []
 
         trades = data["data"]["Solana"]["DEXTrades"]
 
-        print("TOKENS FOUND:", len(trades))
+        for t in trades:
 
-        return trades
+            token = t["Trade"]["Buy"]["Currency"]["MintAddress"]
 
-    except Exception as e:
-
-        print("Bitquery error:", e)
-        return []
-
-
-# ================= ALERTAS =================
-
-async def detect_pumps(context: ContextTypes.DEFAULT_TYPE):
-
-    tokens = fetch_tokens()
-
-    for item in tokens:
-
-        try:
-
-            symbol = item['Trade']['Buy']['Currency']['Symbol']
-            address = item['Trade']['Buy']['Currency']['MintAddress']
-            price = 0.000000
-            volume = float("189119.851620")
-
-            if address in sent_tokens:
+            if token in sent_tokens:
                 continue
 
-            sent_tokens.add(address)
+            symbol = t["Trade"]["Buy"]["Currency"]["Symbol"]
+            name = t["Trade"]["Buy"]["Currency"]["Name"]
 
-            message = build_message(symbol, price, volume)
+            volume = float(t["TradeAmount"])
 
-            keyboard = [[InlineKeyboardButton(
-                "👁 See the whales' entry points 🐋",
-                url=f"{AXIOM_BASE_URL}?token={address}"
-            )]]
+            buy_amount = float(t["Trade"]["Buy"]["Amount"])
 
-            markup = InlineKeyboardMarkup(keyboard)
-
-            await context.bot.send_message(
-                chat_id=GROUP_ID,
-                text=message,
-                reply_markup=markup
-            )
-
-            print("ALERT SENT:", symbol)
-
-        except Exception as e:
-
-            print("TOKEN ERROR:", e)
+            price = float(t["Trade"]["Buy"]["Price"])
 
 
-# ================= GATILHOS =================
+            ##################################
+            # FILTRO PUMP REAL
+            ##################################
 
-trigger_messages = [
+            if volume < 3000:
+                continue
 
-"""📡 Scanner Status
 
-System operating normally.
+            ##################################
+            # FILTRO WHALE
+            ##################################
 
-Multiple early accumulation patterns detected today.
+            if buy_amount < 50:
+                continue
 
-Next signal possible anytime.
+
+            ##################################
+            # FILTRO LIQUIDEZ
+            ##################################
+
+            if price <= 0:
+                continue
+
+
+            sent_tokens.add(token)
+
+            ##################################
+            # MENSAGENS ALTA CONVERSÃO
+            ##################################
+
+            templates = [
+
+f"""
+
+🚨 <b>EARLY PUMP SIGNAL</b>
+
+Smart money detected accumulation.
+
+Token: <b>{name}</b>
+Symbol: <b>${symbol}</b>
+
+💰 Volume Rising
+{round(volume,2)}
+
+🐋 Whale Activity Detected
+
+⚡ Possible Early Pump Phase
+
+Traders entering quietly.
+
+⏳ Early entries win.
+
+👇 Track Token Live
 """,
 
-"""🐋 Whale Behavior Update
+f"""
 
-Large wallets accumulating quietly.
+🔥 <b>WHAL E ENTRY ALERT</b>
 
-Smart money moves before price.
+Large buyers entering position.
+
+Token: <b>{name}</b>
+Symbol: <b>${symbol}</b>
+
+🐋 Whale Detected
+
+💰 Volume:
+{round(volume,2)}
+
+⚡ Accumulation Phase
+
+Possible breakout forming.
+
+👇 Watch Before Pump
 """,
 
-"""⚡ Early Phase Activity
+f"""
 
-AI detecting accumulation patterns.
+📈 <b>SMART MONEY FLOW</b>
 
-Monitoring continues 24/7.
+Unusual activity detected.
+
+Token: <b>{name}</b>
+Symbol: <b>${symbol}</b>
+
+💰 Liquidity Increasing
+
+🐋 Institutional Buying
+
+⚡ Early Stage Opportunity
+
+Don't wait for the pump.
+
+👇 Analyze Token
 """
 ]
 
-
-async def send_trigger(context):
-
-    msg = random.choice(trigger_messages)
-
-    try:
-
-        await context.bot.send_message(
-            chat_id=GROUP_ID,
-            text=msg
-        )
+            send_telegram(random.choice(templates),True)
 
     except:
-        pass
+
+        print("Bitquery error")
 
 
-# ================= START BOT =================
+#########################################
+# MENSAGENS VIRALIZAÇÃO
+#########################################
 
-# ========= START BOT =========
+hooks = [
 
-app = ApplicationBuilder() \
-    .token(TELEGRAM_TOKEN) \
-    .connect_timeout(30) \
-    .read_timeout(30) \
-    .build()
-app.job_queue.run_repeating(
-    detect_pumps,
-    interval=CHECK_INTERVAL,
-    first=60
-)
+"""🔥 Most traders enter too late.
 
-app.job_queue.run_repeating(
-    send_trigger,
-    interval=21600,
-    first=120
-)
+This bot detects before pumps.
 
-print("ELITE WHALE BOT RUNNING")
+Stay ready.""",
 
-app.run_polling()
+"""📊 Early signals create big profits.
+
+Watch alerts carefully.
+
+Opportunities appear fast.""",
+
+"""🚀 Smart money moves silently.
+
+Alerts here reveal early moves.
+
+Be prepared.""",
+
+"""⚡ This bot tracks real whale activity.
+
+Next opportunity can appear anytime.
+
+Stay online."""
+]
+
+
+def send_hook():
+
+    msg=random.choice(hooks)
+
+    send_telegram(msg,False)
+
+
+#########################################
+# LOOP
+#########################################
+
+print("INSTITUTIONAL BOT V2 RUNNING")
+
+last_hook=0
+
+while True:
+
+    now=time.time()
+
+    detect_signals()
+
+    if now-last_hook>21600:
+
+        send_hook()
+
+        last_hook=now
+
+    time.sleep(3600)
