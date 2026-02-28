@@ -75,8 +75,11 @@ def get_data():
             Name
             MintAddress
           }
+          Amount
+          Price
         }
       }
+      TradeAmount
     }
   }
 }
