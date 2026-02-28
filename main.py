@@ -139,19 +139,22 @@ def detect_signals():
 
         for t in trades:
 
-            token = t["Trade"]["Buy"]["Currency"]["MintAddress"]
+            token = t.get("Trade", {}).get("Buy", {}).get("Currency", {}).get("MintAddress")
 
-            if token in sent_tokens:
-                continue
+        if not token:
+            continue
 
-            symbol = t["Trade"]["Buy"]["Currency"]["Symbol"]
-            name = t["Trade"]["Buy"]["Currency"]["Name"]
+        if token in sent_tokens:
+            continue
 
-            volume = float(t["TradeAmount"])
+        symbol = t.get("Trade", {}).get("Buy", {}).get("Currency", {}).get("Symbol","Unknown")
+        name = t.get("Trade", {}).get("Buy", {}).get("Currency", {}).get("Name","Unknown")
 
-            buy_amount = float(t["Trade"]["Buy"]["Amount"])
+        volume = float(t.get("TradeAmount",0))
 
-            price = float(t["Trade"]["Buy"]["Price"])
+        buy_amount = float(t.get("Trade",{}).get("Buy",{}).get("Amount",0))
+
+        price = float(t.get("Trade",{}).get("Buy",{}).get("Price",0))
 
 
             if volume < 3000:
