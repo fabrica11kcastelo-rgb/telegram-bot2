@@ -69,8 +69,7 @@ def get_data():
 query {
 Solana {
 DEXTrades(
-limit: {count: 15}
-orderBy: {descending: TradeAmount}
+limit: {count: 10}
 ) {
 Trade {
 Buy {
@@ -82,14 +81,8 @@ MintAddress
 Amount
 Price
 }
-Sell {
-Amount
-}
 }
 TradeAmount
-Block {
-Time
-}
 }
 }
 }
