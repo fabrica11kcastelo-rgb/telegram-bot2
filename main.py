@@ -18,7 +18,7 @@ REF_LINK = "https://axiom.trade/@wahrungs"
 # ENDPOINT BITQUERY V2
 #########################################
 
-URL = "https://graphql.bitquery.io"
+URL = "https://streaming.bitquery.io/graphql"
 #########################################
 # CONTROLE
 #########################################
@@ -88,10 +88,8 @@ TradeAmount
 """
 
     headers = {
-
 "Content-Type":"application/json",
-"X-API-KEY": BITQUERY_API_KEY
-
+"Authorization": f"Bearer {BITQUERY_API_KEY}"
 }
     
 
