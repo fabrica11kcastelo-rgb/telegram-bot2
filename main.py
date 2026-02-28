@@ -6,12 +6,11 @@ import random
 # CONFIGURAÇÃO
 #########################################
 
-TELEGRAM_TOKEN = "8764476062:AAFffDxJTogKq-2lxXTybJOeqqaIs5CT8p8
-"
+TELEGRAM_TOKEN = "8764476062:AAFffDxJTogKq-2lxXTybJOeqqaIs5CT8p8"
+
 GROUP_ID = -1003647005142
 
-BITQUERY_API_KEY = "ory_at_Cl2GFt1woVbMXFnxhZNBVh_50BxC-rojZ5MIcLLGR-k.uA7w5EChs5Buoq5CIfNPa8In-_ui7lsZXn9TdtOqsWE
-"
+BITQUERY_API_KEY = "ory_at_Cl2GFt1woVbMXFnxhZNBVh_50BxC-rojZ5MIcLLGR-k.uA7w5EChs5Buoq5CIfNPa8In-_ui7lsZXn9TdtOqsWE"
 
 REF_LINK = "https://axiom.trade/@wahrungs"
 
@@ -52,7 +51,12 @@ def send_telegram(text, button=True):
             ]]
         }
 
-    requests.post(url,json=payload)
+    try:
+        requests.post(url,json=payload,timeout=20)
+        print("Telegram OK")
+
+    except Exception as e:
+        print("Telegram Error:",e)
 
 
 #########################################
@@ -64,56 +68,54 @@ def get_data():
     query = """
 query {
 Solana {
-
 DEXTrades(
 limit: {count: 15}
 orderBy: {descending: TradeAmount}
 ) {
-
 Trade {
-
 Buy {
-
 Currency {
 Symbol
 Name
 MintAddress
 }
-
 Amount
-
 Price
 }
-
 Sell {
-
 Amount
 }
-
 }
-
 TradeAmount
-
 Block {
 Time
 }
-
 }
-
 }
 }
 """
 
     headers = {
-
         "Content-Type":"application/json",
         "Authorization":f"Bearer {BITQUERY_API_KEY}"
-
     }
 
-    r = requests.post(URL,json={"query":query},headers=headers)
+    try:
 
-    return r.json()
+        r = requests.post(
+            URL,
+            json={"query":query},
+            headers=headers,
+            timeout=30
+        )
+
+        return r.json()
+
+    except Exception as e:
+
+        print("Bitquery Error:",e)
+
+        return None
 
 
 #########################################
@@ -123,6 +125,9 @@ Time
 def detect_signals():
 
     data = get_data()
+
+    if not data:
+        return
 
     try:
 
@@ -244,9 +249,9 @@ Don't wait for the pump.
 
             send_telegram(random.choice(templates),True)
 
-    except:
+    except Exception as e:
 
-        print("Bitquery error")
+        print("Bitquery parse error:",e)
 
 
 #########################################
