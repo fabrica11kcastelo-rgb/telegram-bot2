@@ -62,47 +62,51 @@ def send_telegram(text, button=True):
 # QUERY BITQUERY V2 (ANTI ERRO)
 #########################################
 
-def def get_data():
+def get_data():
 
-    try:
-
-        query = """
-query MyQuery {
-  Solana(dataset: realtime) {
-    DEXTrades(limit: {count: 5}) {
-      Trade {
-        Buy {
-          Currency {
-            Symbol
-            Name
-            MintAddress
+    query = """
+    query MyQuery {
+      Solana(dataset: realtime) {
+        DEXTrades(
+          limit: {count: 5}
+        ) {
+          Trade {
+            Buy {
+              Currency {
+                Symbol
+                Name
+                MintAddress
+              }
+              Amount
+              Price
+            }
           }
-          Amount
-          Price
+          TradeAmount
+          Block {
+            Time
+          }
         }
-      }
-      TradeAmount
-      Block {
-        Time
       }
     }
-  }
-}
-"""
+    """
 
-        headers = {
-            "Content-Type": "application/json",
-            "Authorization": f"Bearer {BITQUERY_API_KEY}"
-        }
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {BITQUERY_API_KEY}"
+    }
 
-        r = requests.post(URL,json={"query":query},headers=headers)
+    try:
+        r = requests.post(URL, json={"query": query}, headers=headers)
+        data = r.json()
 
-        return r.json()
+        if "data" not in data or data["data"] is None:
+            print("Bitquery data null")
+            return None
+
+        return data
 
     except Exception as e:
-
-        print("Bitquery Error:", e)
-
+        print("Bitquery error:", e)
         return None
 
 
