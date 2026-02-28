@@ -6,7 +6,7 @@ import random
 # CONFIGURAÇÃO
 #########################################
 
-TELEGRAM_TOKEN = "8764476062:AAFffDxJTogKq-2lxXTybJOeqqaIs5CT8p8"
+TELEGRAM_TOKEN = "8764476062:AAFffDxJTogKq-21xXTybJ0eqqaIs5CT8p8"
 
 GROUP_ID = -1003647005142
 
@@ -93,7 +93,7 @@ TradeAmount
 "X-API-KEY": BITQUERY_API_KEY
 
 }
-    }
+    
 
     try:
 
