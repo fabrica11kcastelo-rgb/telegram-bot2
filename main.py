@@ -127,11 +127,37 @@ def detect_signals():
     data = get_data()
 
     if not data:
+        print("Bitquery returned empty")
         return
 
     try:
 
+        if "data" not in data:
+            print("Bitquery no data field")
+            return
+
+        if data["data"] is None:
+            print("Bitquery data null")
+            return
+
+        if "Solana" not in data["data"]:
+            print("Bitquery no Solana")
+            return
+
+        if data["data"]["Solana"] is None:
+            print("Bitquery Solana null")
+            return
+
+        if "DEXTrades" not in data["data"]["Solana"]:
+            print("Bitquery no trades")
+            return
+
         trades = data["data"]["Solana"]["DEXTrades"]
+
+        if not trades:
+            print("No trades found")
+            return
+
 
         for t in trades:
 
@@ -150,35 +176,17 @@ def detect_signals():
             price = float(t["Trade"]["Buy"]["Price"])
 
 
-            ##################################
-            # FILTRO PUMP REAL
-            ##################################
-
             if volume < 3000:
                 continue
 
-
-            ##################################
-            # FILTRO WHALE
-            ##################################
-
             if buy_amount < 50:
                 continue
-
-
-            ##################################
-            # FILTRO LIQUIDEZ
-            ##################################
 
             if price <= 0:
                 continue
 
 
             sent_tokens.add(token)
-
-            ##################################
-            # MENSAGENS ALTA CONVERSÃO
-            ##################################
 
             templates = [
 
@@ -251,7 +259,7 @@ Don't wait for the pump.
 
     except Exception as e:
 
-        print("Bitquery parse error:",e)
+        print("Bitquery safe error:",e)
 
 
 #########################################
