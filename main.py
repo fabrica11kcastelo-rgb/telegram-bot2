@@ -18,7 +18,7 @@ REF_LINK = "https://axiom.trade/@wahrungs"
 # ENDPOINT BITQUERY V2
 #########################################
 
-URL = "https://graphql.bitquery.io"
+URL = "https://streaming.bitquery.io/graphql"
 #########################################
 # CONTROLE
 #########################################
@@ -65,29 +65,19 @@ def send_telegram(text, button=True):
 def get_data():
 
     query = """
-{
+query {
   Solana {
-    DEXTrades(
-      options: {
-        limit: 5
-        desc: "tradeAmount"
-      }
-    ) {
-      tradeAmount
-
-      buyAmount
-
-      buyCurrency {
-        symbol
-        name
-        address
-      }
-
-      block {
-        timestamp {
-          time
+    DEXTrades(limit: {count: 5}) {
+      Trade {
+        Buy {
+          Currency {
+            Symbol
+            Name
+            MintAddress
+          }
         }
       }
+      TradeAmount
     }
   }
 }
