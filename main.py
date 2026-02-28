@@ -62,14 +62,14 @@ def send_telegram(text, button=True):
 # QUERY BITQUERY V2 (ANTI ERRO)
 #########################################
 
-def get_data():
+def def get_data():
 
-    query = """
+    try:
+
+        query = """
 query MyQuery {
   Solana(dataset: realtime) {
-    DEXTrades(
-      limit: {count: 5}
-    ) {
+    DEXTrades(limit: {count: 5}) {
       Trade {
         Buy {
           Currency {
@@ -90,18 +90,18 @@ query MyQuery {
 }
 """
 
-    headers = {
-        "Content-Type":"application/json",
-        "Authorization":f"Bearer {BITQUERY_API_KEY}"
-    }
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {BITQUERY_API_KEY}"
+        }
 
-    r = requests.post(URL,json={"query":query},headers=headers)
+        r = requests.post(URL,json={"query":query},headers=headers)
 
-    return r.json()
+        return r.json()
 
     except Exception as e:
 
-        print("Bitquery Error:",e)
+        print("Bitquery Error:", e)
 
         return None
 
