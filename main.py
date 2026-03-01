@@ -228,6 +228,9 @@ def detect_signals():
 
             if price <= 0:
                 continue
+                
+            if symbol in ["WSOL","USDC","USDT","SOL"]:
+    continue
 
 
             sent_tokens.add(token)
