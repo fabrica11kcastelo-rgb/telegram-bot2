@@ -59,17 +59,17 @@ def send_telegram(text, button=True):
 
 
 #########################################
-# QUERY BITQUERY V2 (ANTI ERRO)
+# GET DATA BITQUERY
 #########################################
 
 def get_data():
 
     query = """
-query MyQuery {
+query {
   Solana(dataset: realtime) {
     DEXTrades(
       limit: {count: 10}
-      orderBy: {descending: TradeAmount}
+      orderBy: {descendingByField: "TradeAmount"}
     ) {
       Trade {
         Buy {
@@ -82,7 +82,7 @@ query MyQuery {
           Price
         }
       }
-      TradeAmount
+      TradeAmount: sum(of: Trade_Buy_Amount)
       Block {
         Time
       }
@@ -97,7 +97,12 @@ query MyQuery {
     }
 
     try:
+
         r = requests.post(URL, json={"query": query}, headers=headers)
+
+        print("STATUS:", r.status_code)
+        print("RAW:", r.text[:500])
+
         data = r.json()
 
         if "data" not in data or data["data"] is None:
@@ -123,7 +128,7 @@ def detect_signals():
         print("Bitquery returned empty")
         return
 
-    try: 
+    try:
 
         if "data" not in data:
             print("Bitquery no data field")
@@ -145,7 +150,11 @@ def detect_signals():
             print("Bitquery no trades")
             return
 
+
         trades = data["data"]["Solana"]["DEXTrades"]
+
+        print("TOKENS FOUND:", len(trades))
+
 
         if not trades:
             print("No trades found")
@@ -164,17 +173,29 @@ def detect_signals():
                 if token in sent_tokens:
                     continue
 
+
                 symbol = t.get("Trade", {}).get("Buy", {}).get("Currency", {}).get("Symbol", "Unknown")
+
                 name = t.get("Trade", {}).get("Buy", {}).get("Currency", {}).get("Name", "Unknown")
 
+
                 volume = float(t.get("TradeAmount", 0))
+
                 buy_amount = float(t.get("Trade", {}).get("Buy", {}).get("Amount", 0))
+
                 price = float(t.get("Trade", {}).get("Buy", {}).get("Price", 0))
 
+
             except Exception as e:
+
                 print("Parse error:", e)
+
                 continue
 
+
+            ###################################
+            # FILTROS
+            ###################################
 
             if volume < 3000:
                 continue
@@ -184,6 +205,11 @@ def detect_signals():
 
             if price <= 0:
                 continue
+
+
+            print("ALERTA ENCONTRADO")
+
+            print(symbol, volume)
 
 
             sent_tokens.add(token)
