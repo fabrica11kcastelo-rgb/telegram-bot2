@@ -162,7 +162,7 @@ def detect_signals():
             return
 
 
-        for t in trades:
+                for t in trades:
 
             try:
 
@@ -175,24 +175,41 @@ def detect_signals():
                     continue
 
 
+                #################################
+                # SYMBOL SEGURO
+                #################################
+
                 symbol = t.get("Trade", {}).get("Buy", {}).get("Currency", {}).get("Symbol")
 
-if not symbol or symbol == "":
-    symbol = "NEW TOKEN"
+                if not symbol or symbol == "":
+                    symbol = "NEW TOKEN"
+
+
+                #################################
+                # NAME SEGURO
+                #################################
 
                 name = t.get("Trade", {}).get("Buy", {}).get("Currency", {}).get("Name")
- 
-if not name or name == "":
-    name = "Unknown"
+
+                if not name or name == "":
+                    name = "Unknown"
 
 
-# VOLUME EM USD REAL
-               volume = float(t.get("TradeAmountInUSD", 0))
+                #################################
+                # VOLUME USD REAL
+                #################################
+
+                volume = float(t.get("TradeAmountInUSD", 0))
 
 
-               buy_amount = float(t.get("Trade", {}).get("Buy", {}).get("Amount", 0))
+                #################################
+                # OUTROS DADOS
+                #################################
 
-               price = float(t.get("Trade", {}).get("Buy", {}).get("Price", 0))
+                buy_amount = float(t.get("Trade", {}).get("Buy", {}).get("Amount", 0))
+
+                price = float(t.get("Trade", {}).get("Buy", {}).get("Price", 0))
+
 
             except Exception as e:
 
