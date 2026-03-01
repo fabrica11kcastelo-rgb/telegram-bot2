@@ -230,7 +230,7 @@ def detect_signals():
                 continue
                 
             if symbol in ["WSOL","USDC","USDT","SOL"]:
-    continue
+                continue
 
 
             sent_tokens.add(token)
