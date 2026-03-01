@@ -175,17 +175,24 @@ def detect_signals():
                     continue
 
 
-                symbol = t.get("Trade", {}).get("Buy", {}).get("Currency", {}).get("Symbol", "Unknown")
+                symbol = t.get("Trade", {}).get("Buy", {}).get("Currency", {}).get("Symbol")
 
-                name = t.get("Trade", {}).get("Buy", {}).get("Currency", {}).get("Name", "Unknown")
+if not symbol or symbol == "":
+    symbol = "NEW TOKEN"
+
+                name = t.get("Trade", {}).get("Buy", {}).get("Currency", {}).get("Name")
+ 
+if not name or name == "":
+    name = "Unknown"
 
 
-                volume = float(t.get("TradeAmount", 0))
+# VOLUME EM USD REAL
+               volume = float(t.get("TradeAmountInUSD", 0))
 
-                buy_amount = float(t.get("Trade", {}).get("Buy", {}).get("Amount", 0))
 
-                price = float(t.get("Trade", {}).get("Buy", {}).get("Price", 0))
+               buy_amount = float(t.get("Trade", {}).get("Buy", {}).get("Amount", 0))
 
+               price = float(t.get("Trade", {}).get("Buy", {}).get("Price", 0))
 
             except Exception as e:
 
