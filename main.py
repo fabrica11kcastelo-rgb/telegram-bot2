@@ -137,7 +137,7 @@ def detect_signals():
             return
 
 
-    for t in trades:
+for t in trades:
 
     try:
 
