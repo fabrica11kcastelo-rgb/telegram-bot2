@@ -139,7 +139,9 @@ def detect_signals():
 
         for t in trades:
 
-            token = t.get("Trade", {}).get("Buy", {}).get("Currency", {}).get("MintAddress")
+    try:
+
+        token = t.get("Trade", {}).get("Buy", {}).get("Currency", {}).get("MintAddress")
 
         if not token:
             continue
@@ -151,20 +153,22 @@ def detect_signals():
         name = t.get("Trade", {}).get("Buy", {}).get("Currency", {}).get("Name","Unknown")
 
         volume = float(t.get("TradeAmount",0))
-
         buy_amount = float(t.get("Trade",{}).get("Buy",{}).get("Amount",0))
-
         price = float(t.get("Trade",{}).get("Buy",{}).get("Price",0))
 
+    except Exception as e:
+        print("Parse error:",e)
+        continue
 
-            if volume < 3000:
-                continue
 
-            if buy_amount < 50:
-                continue
+        if volume < 3000:
+            continue
 
-            if price <= 0:
-                continue
+        if buy_amount < 50:
+            continue
+
+        if price <= 0:
+            continue
 
 
             sent_tokens.add(token)
