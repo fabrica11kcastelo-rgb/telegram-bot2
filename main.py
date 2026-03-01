@@ -137,38 +137,38 @@ def detect_signals():
             return
 
 
-for t in trades:
+        for t in trades:
 
-    try:
+            try:
 
-        token = t.get("Trade", {}).get("Buy", {}).get("Currency", {}).get("MintAddress")
+                token = t.get("Trade", {}).get("Buy", {}).get("Currency", {}).get("MintAddress")
 
-        if not token:
-            continue
+                if not token:
+                    continue
 
-        if token in sent_tokens:
-            continue
+                if token in sent_tokens:
+                    continue
 
-        symbol = t.get("Trade", {}).get("Buy", {}).get("Currency", {}).get("Symbol","Unknown")
-        name = t.get("Trade", {}).get("Buy", {}).get("Currency", {}).get("Name","Unknown")
+                symbol = t.get("Trade", {}).get("Buy", {}).get("Currency", {}).get("Symbol", "Unknown")
+                name = t.get("Trade", {}).get("Buy", {}).get("Currency", {}).get("Name", "Unknown")
 
-        volume = float(t.get("TradeAmount",0))
-        buy_amount = float(t.get("Trade",{}).get("Buy",{}).get("Amount",0))
-        price = float(t.get("Trade",{}).get("Buy",{}).get("Price",0))
+                volume = float(t.get("TradeAmount", 0))
+                buy_amount = float(t.get("Trade", {}).get("Buy", {}).get("Amount", 0))
+                price = float(t.get("Trade", {}).get("Buy", {}).get("Price", 0))
 
-    except Exception as e:
-        print("Parse error:",e)
-        continue
+            except Exception as e:
+                print("Parse error:", e)
+                continue
 
 
-        if volume < 3000:
-            continue
+            if volume < 3000:
+                continue
 
-        if buy_amount < 50:
-            continue
+            if buy_amount < 50:
+                continue
 
-        if price <= 0:
-            continue
+            if price <= 0:
+                continue
 
 
             sent_tokens.add(token)
