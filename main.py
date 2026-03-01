@@ -108,7 +108,7 @@ def detect_signals():
         print("Bitquery returned empty")
         return
 
-    try:
+    try: 
 
         if "data" not in data:
             print("Bitquery no data field")
