@@ -62,6 +62,8 @@ def send_telegram(text, button=True):
 # GET DATA BITQUERY
 #########################################
 
+
+
 def get_data():
 
     query = """
@@ -162,7 +164,7 @@ def detect_signals():
             return
 
 
-                for t in trades:
+        for t in trades:
 
             try:
 
@@ -176,7 +178,7 @@ def detect_signals():
 
 
                 #################################
-                # SYMBOL SEGURO
+                # SYMBOL
                 #################################
 
                 symbol = t.get("Trade", {}).get("Buy", {}).get("Currency", {}).get("Symbol")
@@ -186,7 +188,7 @@ def detect_signals():
 
 
                 #################################
-                # NAME SEGURO
+                # NAME
                 #################################
 
                 name = t.get("Trade", {}).get("Buy", {}).get("Currency", {}).get("Name")
@@ -218,10 +220,6 @@ def detect_signals():
                 continue
 
 
-            ###################################
-            # FILTROS
-            ###################################
-
             if volume < 3000:
                 continue
 
@@ -232,12 +230,8 @@ def detect_signals():
                 continue
 
 
-            print("ALERTA ENCONTRADO")
-
-            print(symbol, volume)
-
-
             sent_tokens.add(token)
+
 
             templates = [
 
@@ -306,11 +300,11 @@ Don't wait for the pump.
 """
 ]
 
-            send_telegram(random.choice(templates),True)
+            send_telegram(random.choice(templates), True)
 
     except Exception as e:
 
-        print("Bitquery safe error:",e)
+        print("Bitquery safe error:", e)
 
 
 #########################################
