@@ -65,11 +65,11 @@ def send_telegram(text, button=True):
 def get_data():
 
     query = """
-query {
+query MyQuery {
   Solana(dataset: realtime) {
     DEXTrades(
       limit: {count: 10}
-      orderBy: {descendingByField: "TradeAmount"}
+      orderBy: {descendingByField: "TradeAmountInUSD"}
     ) {
       Trade {
         Buy {
@@ -80,9 +80,10 @@ query {
           }
           Amount
           Price
+          PriceInUSD
         }
       }
-      TradeAmount: sum(of: Trade_Buy_Amount)
+      TradeAmountInUSD: sum(of: Trade_Buy_AmountInUSD)
       Block {
         Time
       }
