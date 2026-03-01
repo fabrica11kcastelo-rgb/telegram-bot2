@@ -118,6 +118,39 @@ query MyQuery {
         print("Bitquery error:", e)
         return None
 
+#########################################
+# MARKETCAP (DEXSCREENER)
+#########################################
+
+def get_marketcap(token):
+
+    try:
+
+        url = f"https://api.dexscreener.com/latest/dex/tokens/{token}"
+
+        r = requests.get(url, timeout=10)
+
+        data = r.json()
+
+        if "pairs" not in data or not data["pairs"]:
+            return "Unknown"
+
+        pair = data["pairs"][0]
+
+        marketcap = pair.get("fdv")
+
+        if not marketcap:
+            return "Unknown"
+
+        marketcap = float(marketcap)
+
+        return f"${marketcap:,.0f}"
+
+    except Exception as e:
+
+        print("Marketcap error:", e)
+
+        return "Unknown"
 
 #########################################
 # FILTRO INTELIGENTE
@@ -176,7 +209,8 @@ def detect_signals():
                 if token in sent_tokens:
                     continue
 
-
+                marketcap = get_marketcap(token)
+                
                 #################################
                 # SYMBOL
                 #################################
@@ -249,6 +283,7 @@ Symbol: <b>${symbol}</b>
 
 💰 Volume Rising
 {round(volume,2)}
+MarketCap: {marketcap}
 
 🐋 Whale Activity Detected
 
@@ -274,6 +309,7 @@ Symbol: <b>${symbol}</b>
 
 💰 Volume:
 {round(volume,2)}
+MarketCap: {marketcap}
 
 ⚡ Accumulation Phase
 
@@ -287,9 +323,12 @@ f"""
 📈 <b>SMART MONEY FLOW</b>
 
 Unusual activity detected.
-
+💰 Volume:
+{round(volume,2)}
 Token: <b>{name}</b>
 Symbol: <b>${symbol}</b>
+MarketCap: {marketcap}
+Price: ${price}
 
 💰 Liquidity Increasing
 
